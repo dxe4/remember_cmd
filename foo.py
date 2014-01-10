@@ -1,4 +1,3 @@
-import q
 import time
 count = 1
 while count < 4:
