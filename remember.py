@@ -1,13 +1,28 @@
 import subprocess
 import sys
 import os
+import pickle
+
+global file_name
+file_name = os.path.join(os.path.expanduser("~"), "foo")
 
 
-def load_file():
-    file_name = os.path.join(os.path.expanduser("~"), "foo")
-    mode = "a" if os.path.exists(file_name) else "w"
-    return open(file_name, mode)
+class Store:
+    def __init__(self):
+        self.commands = {}
 
+
+def load_store():
+    if not os.path.exists(file_name):
+        store = Store()
+        pickle.dump(store, open(file_name, "wb"))
+        return store
+    else:
+        return pickle.load(open(file_name, "rb"))
+
+
+def save_store(store):
+    pickle.dump(store, open(file_name, "wb"))
 
 def exec_command(command: str):
     proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
@@ -17,13 +32,12 @@ def exec_command(command: str):
         sys.stdout.buffer.write(output)
 
 
-def _write(command, _file):
-    _file.write("%s%s" % (command, "\n"))
-    _file.flush()
 
 
-file = load_file()
-_write("foo", file)
+store = load_store()
+#store.commands["hisgrep"] = "history | grep "
+#save_store(store)
+
+
 exec_command("python foo.py")
 
-file.close()
