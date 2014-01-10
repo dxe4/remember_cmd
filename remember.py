@@ -46,11 +46,31 @@ def appent_to_store(command, key=None, meta_data=None):
     pass
 
 
-def delete_from_store(command=None, key=None, meta_data=None):
+def delete_from_store(command=None, key=None, meta_data=None, regex=False):
+    """
+        Delete command(s) from store.
+        Multiple values can be deleted if regex mode is used,
+            or if the exactly the same meta_data exists in more than one commands
+    @param command: If command is given the command(s) will be deleted.
+    @param key: If key is given the command corresponding to that key will be deleted
+    @param meta_data: If meta_data is given the command(s) corresponding to meta_data will be deleted
+    @param regex: If regex is set to true the command and meta_data will be used as regex
+            and multiple commands may be deleted at once
+    """
     pass
 
 
-def find_in_store(command=None, key=None, meta_data=None):
+def find_in_store(command=None, key=None, meta_data=None, regex=False):
+    """
+        Find commands from store.
+        Multiple values can be found if regex mode is used,
+            or if the exactly the same meta_data exists in more than one commands
+    @param command: If command is given will try to find the corresponding command(s)
+    @param key: If key is given the command matching the key will be returned
+    @param meta_data: If metadata is given the corresponding command(s) will be returned
+    @param regex: If regex mode is given meta_data and command will be used as regex
+    @return The found command(s)
+    """
     pass
 
 
