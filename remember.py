@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import sqlite3
+from collections import OrderedDict
 
 
 # TODO consider service running at startup not sure if it worths doing yet
@@ -41,17 +42,25 @@ class DB:
             raise Exception("Connection doesn't exist can't disconnect")
         self.conn.close()
 
+    def insert(self, _dict: dict):
+        _dict = OrderedDict(_dict)
+        keys, values = _dict.keys(), _dict.values()
+        cursor = self.conn.cursor()
+        query = "INSERT INTO command ('%s') VALUES %s" \
+                % ("','".join(keys), str(tuple("?"*len(values))))
+        cursor.execute(query, values)
+
     def create(self):
         conn = sqlite3.connect(self.db_name)
-        cursor = self.conn.cursor()
+        cursor = conn.cursor()
         cursor.execute("""
-        CREATE TABLE commands(
-            id INTEGER PRIMARY KEY,
-            key TEXT,
-            metadata TEXT,
-            deleted TINYINT DEFAULT 0,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
+            CREATE TABLE commands(
+                id INTEGER PRIMARY KEY,
+                key VARCHAR(150),
+                metadata VARCHAR(350),
+                deleted TINYINT DEFAULT 0,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
         """)
         cursor.close()
         conn.commit()
@@ -206,6 +215,7 @@ def exec_command(command: str):
 
 
 if __name__ == "__main__":
+    db = DB()
     Input()
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
