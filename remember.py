@@ -16,6 +16,10 @@ class Input:
                  help="Specify command",
                  type=str, nargs="*")
 
+        self.add("-fh", "--from_history",
+                 help="Adds a command from history e.g. remember -h -1 -ak foo ",
+                 type=int, nargs="*")
+
         self.add("-ak", "--add_key",
                  help="Add command using a key e.g. remember -c history -ak his",
                  type=str, nargs=1, metavar="KEY")
