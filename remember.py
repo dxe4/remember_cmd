@@ -7,6 +7,9 @@ import argparse
 global file_name
 file_name = os.path.join(os.path.expanduser("~"), "foo")
 
+# TODO consider sql lite i dont like pickle here
+# TODO consider service running at startup not sure if it worths doing yet
+
 # argparse provides groups for arg dependencies but in this case it would
 # be a lot of dirty code
 dependant_args = {
