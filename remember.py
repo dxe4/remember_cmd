@@ -2,9 +2,50 @@ import subprocess
 import sys
 import os
 import pickle
+import argparse
 
 global file_name
 file_name = os.path.join(os.path.expanduser("~"), "foo")
+
+
+class Input:
+    def __init__(self):
+        self.parser = argparse.ArgumentParser()
+        self.add("-ak", "--add_key",
+                 help="Add command using a key",
+                 type=str, nargs=2)
+        self.add("-rk", "--remove_key",
+                 help="Remove command using a key",
+                 type=str, nargs=1)
+        self.add("-sk", "--search_key",
+                 help="Search command using a key",
+                 type=str, nargs='*')
+        self.add("-am", "--add_metadata",
+                 help="Add metadata to the command",
+                 type=str, nargs=2)
+        self.add("-rm", "--remove_metadata",
+                 help="Remove metadata from command",
+                 type=str, nargs=1)
+        self.add("-sm", "--search_metadata",
+                 help="Search for commands with metadata",
+                 type=str, nargs='*')
+        self.add("-a", "--add",
+                 help="Add command without information",
+                 type=str, nargs='*')
+        self.add("-r", "--remove",
+                 help="Remove command",
+                 type=str, nargs='*')
+        self.add("-s", "--search",
+                 help="Search command",
+                 type=str, nargs="*")
+        self.add("-R", "--regex",
+                 help="use args as a regex for searching)",
+                 action='store_true', default=False)
+
+        print(vars(self.parser.parse_args()))
+
+    def add(self, *args, **kwargs):
+        self.parser.add_argument(*args, **kwargs)
 
 
 class Store:
@@ -83,5 +124,7 @@ def exec_command(command: str):
         sys.stdout.buffer.write(output)
 
 local_store = load_store()
+
+Input()
 #store.commands["hisgrep"] = "history | grep "
 #save_store(store)
