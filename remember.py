@@ -84,6 +84,10 @@ class Input:
                       "If more than one found will prompt to choose",
                  action='store_true', default=False)
 
+        self.add("-l", "--list",
+                 help="List all commands e.g. remember -l",
+                 action='store_true', default=False)
+
         self.args = vars(self.parser.parse_args())
         print(self.state_validation())
 
