@@ -109,7 +109,7 @@ class Input:
             # case dependant keys
             # don't have any of the dependant args
             if not [val for val in dependant_args[key]
-                    if val in self.args]:
+                    if self.args[val]]:
                 return False, dependant_keys
         return True
 
