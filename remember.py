@@ -8,16 +8,6 @@ global file_name
 file_name = os.path.join(os.path.expanduser("~"), "foo")
 
 
-import subprocess
-import sys
-import os
-import pickle
-import argparse
-
-global file_name
-file_name = os.path.join(os.path.expanduser("~"), "foo")
-
-
 class Input:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
