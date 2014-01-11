@@ -7,6 +7,14 @@ import argparse
 global file_name
 file_name = os.path.join(os.path.expanduser("~"), "foo")
 
+# argparse provides groups for arg dependencies but in this case it would be a lot of dirty code
+dependant_args = {
+    "ak": ("c", "fh"),
+    "am": ("c", "fh"),
+    "-e": ("fh", "sk", "sm", "s"),
+    "-es": ("fh", "sk", "sm", "s"),
+    "-R": ("s", "r", "sm", "rm", "sk", "rk")
+}
 
 class Input:
     def __init__(self):
