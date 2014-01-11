@@ -13,8 +13,9 @@ dependant_args = {
     "am": ("c", "fh"),
     "-e": ("fh", "sk", "sm", "s"),
     "-es": ("fh", "sk", "sm", "s"),
-    "-R": ("s", "r", "sm", "rm", "sk", "rk")
+    "-R": ("s", "r", "sm", "rm", "sk", "rk"),
 }
+
 
 class Input:
     def __init__(self):
@@ -25,7 +26,7 @@ class Input:
                  type=str, nargs="*")
 
         self.add("-fh", "--from_history",
-                 help="Adds a command from history e.g. remember -h -1 -ak foo ",
+                 help="Adds a command from history e.g. remember -fh -1 -ak foo ",
                  type=int, nargs="*")
 
         self.add("-ak", "--add_key",
