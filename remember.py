@@ -11,35 +11,59 @@ file_name = os.path.join(os.path.expanduser("~"), "foo")
 class Input:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
-        self.add("-ak", "--add_key",
-                 help="Add command using a key",
-                 type=str, nargs=2)
-        self.add("-rk", "--remove_key",
-                 help="Remove command using a key",
-                 type=str, nargs=1)
-        self.add("-sk", "--search_key",
-                 help="Search command using a key",
-                 type=str, nargs='*')
-        self.add("-am", "--add_metadata",
-                 help="Add metadata to the command",
-                 type=str, nargs=2)
-        self.add("-rm", "--remove_metadata",
-                 help="Remove metadata from command",
-                 type=str, nargs=1)
-        self.add("-sm", "--search_metadata",
-                 help="Search for commands with metadata",
-                 type=str, nargs='*')
-        self.add("-a", "--add",
-                 help="Add command without information",
-                 type=str, nargs='*')
-        self.add("-r", "--remove",
-                 help="Remove command",
-                 type=str, nargs='*')
-        self.add("-s", "--search",
-                 help="Search command",
+
+        self.add("-c", "--command",
+                 help="Specify command",
                  type=str, nargs="*")
+
+        self.add("-ak", "--add_key",
+                 help="Add command using a key e.g. remember -c history -ak his",
+                 type=str, nargs=1)
+
+        self.add("-rk", "--remove_key",
+                 help="Remove command using a key e.g. remember -rk his",
+                 type=str, nargs=1)
+
+        self.add("-sk", "--search_key",
+                 help="Search command using a key e.g. remember -sk his",
+                 type=str, nargs=1)
+
+        self.add("-am", "--add_metadata",
+                 help="Add metadata to the command e.g. remember -c history -am history of commands",
+                 type=str, nargs="*")
+
+        self.add("-rm", "--remove_metadata",
+                 help="Remove metadata from command e.g. remember -c history -rm of commands",
+                 type=str, nargs="*")
+
+        self.add("-sm", "--search_metadata",
+                 help="Search for commands with metadata e.g. remember -sm of commands",
+                 type=str, nargs="*")
+
+        self.add("-a", "--add",
+                 help='Add command without information e.g. remember -a "history | grep foo"',
+                 type=str, nargs="*")
+
+        self.add("-r", "--remove",
+                 help='Remove command e.g. remember -r "history | grep foo"',
+                 type=str, nargs=1)
+
+        self.add("-s", "--search",
+                 help='Search command e.g. remember -s history -R (see regex for R)',
+                 type=str, nargs=1)
+
         self.add("-R", "--regex",
-                 help="use args as a regex for searching)",
+                 help="use args as a regex for searching) e.g. remember -sk foo -R",
+                 action='store_true', default=False)
+
+        self.add("-e", "--exec",
+                 help="Execute the command found. If more than one found will prompt to choose",
+                 action='store_true', default=False)
+
+        self.add("-es", "--exec_safe",
+                 help="Execute the command found but prompt before executing "
+                      "(showing the command to be executed and asking for confirmation)"
+                      "If more than one found will prompt to choose",
                  action='store_true', default=False)
 
         print(vars(self.parser.parse_args()))
