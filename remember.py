@@ -18,39 +18,39 @@ class Input:
 
         self.add("-ak", "--add_key",
                  help="Add command using a key e.g. remember -c history -ak his",
-                 type=str, nargs=1)
+                 type=str, nargs=1, metavar="KEY")
 
         self.add("-rk", "--remove_key",
                  help="Remove command using a key e.g. remember -rk his",
-                 type=str, nargs=1)
+                 type=str, nargs=1, metavar="KEY")
 
         self.add("-sk", "--search_key",
                  help="Search command using a key e.g. remember -sk his",
-                 type=str, nargs=1)
+                 type=str, nargs=1, metavar="KEY")
 
         self.add("-am", "--add_metadata",
                  help="Add metadata to the command e.g. remember -c history -am history of commands",
-                 type=str, nargs="*")
+                 type=str, nargs="*", metavar="METADATA")
 
         self.add("-rm", "--remove_metadata",
                  help="Remove metadata from command e.g. remember -c history -rm of commands",
-                 type=str, nargs="*")
+                 type=str, nargs="*", metavar="METADATA")
 
         self.add("-sm", "--search_metadata",
                  help="Search for commands with metadata e.g. remember -sm of commands",
-                 type=str, nargs="*")
+                 type=str, nargs="*", metavar="METADATA")
 
         self.add("-a", "--add",
                  help='Add command without information e.g. remember -a "history | grep foo"',
-                 type=str, nargs="*")
+                 type=str, nargs="*", metavar="COMMAND")
 
         self.add("-r", "--remove",
                  help='Remove command e.g. remember -r "history | grep foo"',
-                 type=str, nargs=1)
+                 type=str, nargs=1, metavar="COMMAND")
 
         self.add("-s", "--search",
                  help='Search command e.g. remember -s history -R (see regex for R)',
-                 type=str, nargs=1)
+                 type=str, nargs=1, metavar="COMMAND")
 
         self.add("-R", "--regex",
                  help="use args as a regex for searching) e.g. remember -sk foo -R",
