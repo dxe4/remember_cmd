@@ -8,6 +8,16 @@ global file_name
 file_name = os.path.join(os.path.expanduser("~"), "foo")
 
 
+import subprocess
+import sys
+import os
+import pickle
+import argparse
+
+global file_name
+file_name = os.path.join(os.path.expanduser("~"), "foo")
+
+
 class Input:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -17,53 +27,43 @@ class Input:
                  type=str, nargs="*")
 
         self.add("-ak", "--add_key",
-                 help="Add command using a key",
-                 usage="remember -c history -ak his",
+                 help="Add command using a key e.g. remember -c history -ak his",
                  type=str, nargs=1, metavar="KEY")
 
         self.add("-rk", "--remove_key",
-                 help="Remove command using a key",
-                 usage="remember -rk his",
+                 help="Remove command using a key e.g. remember -rk his",
                  type=str, nargs=1, metavar="KEY")
 
         self.add("-sk", "--search_key",
-                 help="Search command using a key",
-                 usage="remember -sk his",
+                 help="Search command using a key e.g. remember -sk his",
                  type=str, nargs=1, metavar="KEY")
 
         self.add("-am", "--add_metadata",
-                 help="Add metadata to the command",
-                 usage="remember -c history -am history of commands",
+                 help="Add metadata to the command e.g. remember -c history -am history of commands",
                  type=str, nargs="*", metavar="METADATA")
 
         self.add("-rm", "--remove_metadata",
-                 help="Remove metadata from command",
-                 usage="remember -c history -rm of commands",
+                 help="Remove metadata from command e.g. remember -c history -rm of commands",
                  type=str, nargs="*", metavar="METADATA")
 
         self.add("-sm", "--search_metadata",
-                 help="Search for commands with metadata",
-                 usage="remember -sm of commands",
+                 help="Search for commands with metadata e.g. remember -sm of commands",
                  type=str, nargs="*", metavar="METADATA")
 
         self.add("-a", "--add",
-                 help='Add command without information',
-                 usage='remember -a "history | grep foo"',
+                 help='Add command without information e.g. remember -a "history | grep foo"',
                  type=str, nargs="*", metavar="COMMAND")
 
         self.add("-r", "--remove",
-                 help='Remove command',
-                 usage='remember -r "history | grep foo"',
+                 help='Remove command e.g. remember -r "history | grep foo"',
                  type=str, nargs=1, metavar="COMMAND")
 
         self.add("-s", "--search",
-                 help='Search command',
-                 usage='remember -s history -R (see regex for R)',
+                 help='Search command e.g. remember -s history -R (see regex for R)',
                  type=str, nargs=1, metavar="COMMAND")
 
         self.add("-R", "--regex",
-                 help="use args as a regex for searching)",
-                 usage='remember -sk foo -R',
+                 help="use args as a regex for searching) e.g. remember -sk foo -R",
                  action='store_true', default=False)
 
         self.add("-e", "--exec",
