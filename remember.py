@@ -1,13 +1,10 @@
 import subprocess
 import sys
 import os
-import pickle
 import argparse
+import sqlite3
 
-global file_name
-file_name = os.path.join(os.path.expanduser("~"), "foo")
 
-# TODO consider sql lite i dont like pickle here
 # TODO consider service running at startup not sure if it worths doing yet
 
 # argparse provides groups for arg dependencies but in this case it would
@@ -22,6 +19,43 @@ dependant_args = {
     "regex": ("search", "remove", "search_metadata",
               "remove_metadata", "search_key", "remove_key"),
 }
+
+
+class DB:
+
+    def __init__(self):
+        self.db_name = os.path.join(os.path.expanduser("~"), ".remember_cmd.db")
+        if not self.exists():
+            self.conn = self.create()
+        else:
+            self.conn = self.connect()
+
+    def exists(self):
+        return os.path.exists(self.db_name)
+
+    def connect(self):
+        return sqlite3.connect(self.db_name)
+
+    def disconnect(self):
+        if not self.conn:
+            raise Exception("Connection doesn't exist can't disconnect")
+        self.conn.close()
+
+    def create(self):
+        conn = sqlite3.connect(self.db_name)
+        cursor = self.conn.cursor()
+        cursor.execute("""
+        CREATE TABLE commands(
+            id INTEGER PRIMARY KEY,
+            key TEXT,
+            metadata TEXT,
+            deleted TINYINT DEFAULT 0,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+        cursor.close()
+        conn.commit()
+        return conn
 
 
 class Input:
@@ -114,26 +148,6 @@ class Input:
         return True
 
 
-class Store:
-
-    def __init__(self):
-        self.commands_dict = {}
-        self.commands_list = []
-
-
-def load_store():
-    if not os.path.exists(file_name):
-        store = Store()
-        pickle.dump(store, open(file_name, "wb"))
-        return store
-    else:
-        return pickle.load(open(file_name, "rb"))
-
-
-def save_store(store: Store):
-    pickle.dump(store, open(file_name, "wb"))
-
-
 def appent_to_store(command, key=None, meta_data=None):
     """
         Appends a command in the store.
@@ -192,7 +206,6 @@ def exec_command(command: str):
 
 
 if __name__ == "__main__":
-    local_store = load_store()
     Input()
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
