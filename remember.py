@@ -109,8 +109,8 @@ class ArgHandler:
         # argparse provides groups for arg dependencies but in this case it would
         # be a lot of dirty code
         self.dependant_args = {
-            "add_key": ("command", "find_history"),
-            "add_metadata": ("command", "find_history"),
+            "add_key": ("command", "from_history"),
+            "add_metadata": ("command", "from_history"),
             "exec": ("find_history", "search_key",
                      "search_metadata", "search"),
             "exec_safe": ("find_history", "search_key",
@@ -121,7 +121,7 @@ class ArgHandler:
 
         self.add("command_args", "-c", "--command",
                  help="Specify command",
-                 type=str, nargs="*")
+                 type=str, nargs=1)
 
         self.add("command_args", "-fh", "--from_history",
                  help="Adds a command from history e.g. remember -fh -1 -ak foo ",
@@ -198,6 +198,8 @@ class ArgHandler:
         for key in dependant_keys:
             # case dependant keys
             # don't have any of the dependant args
+            print(self.dependant_args[key])
+
             if not [val for val in self.dependant_args[key]
                     if self.args[val]]:
                 return dependant_keys
@@ -222,6 +224,23 @@ def exec_command(command: str):
         sys.stdout.buffer.write(output)
 
 
+class InputProcessor():
+    def __init__(self, _args: dict):
+        self._args = _args
+        self.command = self._get_command()
+        self.search = self._get_other("search_args")
+        self.insert = self. _get_other("add_args")
+        self.delete = self._get_other("delete_args")
+        self.other = self._get_other("other_args")
+
+    def _get_command(self):
+        return next((v[0][0] for v in self._args.values() if v[1] == "command_args"))
+
+    def _get_other(self, to_check: str):
+        print(self._args.values())
+        return [v[0][0] for v in self._args.values() if v[1] == to_check]
+
+
 if __name__ == "__main__":
     arg_handler = ArgHandler()
     _args = arg_handler.get_input()
@@ -229,12 +248,7 @@ if __name__ == "__main__":
         raise NotImplementedError("Need to give a proper warning which args have dependencies")
     if not _args:
         arg_handler.parser.print_help()
-    # {'list': (True, 'other_args')}
-    for k, v in _args.items():
-        cmd, search, add, delete =\
-            map(lambda arg: (arg is v[1], arg), ["command_args", "search_args", "add_args", "delete_args"])
-        print(cmd, search, add, delete)
-        
+    input_processor = InputProcessor(_args)
     db = DB()
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
