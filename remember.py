@@ -53,7 +53,7 @@ class DB:
         return conn
 
 
-class Input:
+class ArgHandler:
 
     def __init__(self):
         self.parser = argparse.ArgumentParser()
@@ -134,9 +134,6 @@ class Input:
                  action='store_true', default=False)
 
         self.args = vars(self.parser.parse_args())
-        print(self.state_validation())
-        print(self.args)
-        print(self.arg_type_dict)
 
     def add(self, arg_type, *args, **kwargs):
         arg = self.parser.add_argument(*args, **kwargs)
@@ -226,8 +223,12 @@ def exec_command(command: str):
 
 
 if __name__ == "__main__":
+    arg_handler = ArgHandler()
+    _args = arg_handler.get_input()
+    if not arg_handler.state_validation():
+        raise NotImplementedError("Need to give a proper warning which args have dependencies")
+    if not _args:
+        arg_handler.parser.print_help()
     db = DB()
-    _input = Input()
-    print(_input .get_input())
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
