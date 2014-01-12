@@ -154,15 +154,15 @@ class Input:
                           if self.args[key]]
         # no dependant keys we can go on
         if not dependant_keys:
-            return True
+            return []
 
         for key in dependant_keys:
             # case dependant keys
             # don't have any of the dependant args
             if not [val for val in dependant_args[key]
                     if self.args[val]]:
-                return False, dependant_keys
-        return True
+                return dependant_keys
+        return []
 
 
 def append_to_store(command, key=None, meta_data=None):
