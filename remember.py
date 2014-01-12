@@ -157,7 +157,7 @@ class Input:
         return True
 
 
-def appent_to_store(command, key=None, meta_data=None):
+def append_to_store(command, key=None, meta_data=None):
     """
         Appends a command in the store.
         You can retrieve the command back in 3 different ways:
@@ -208,9 +208,9 @@ def find_in_store(command=None, key=None, meta_data=None, regex=False):
 def exec_command(command: str):
     # TODO later use for --exec parameter
     # exec_command("python foo.py")
-    proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-    while proc.poll() is None:
-        output = proc.stdout.readline()
+    procedure = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    while procedure.poll() is None:
+        output = procedure.stdout.readline()
         sys.stdout.buffer.write(output)
 
 
