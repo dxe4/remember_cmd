@@ -188,7 +188,6 @@ class ArgHandler:
         self.arg_type_dict[arg.dest] = arg_type
 
     def state_validation(self):
-        print(self.args)
         dependant_keys = [key for key in self.dependant_args.keys()
                           if self.args[key]]
         # no dependant keys we can go on
@@ -198,8 +197,6 @@ class ArgHandler:
         for key in dependant_keys:
             # case dependant keys
             # don't have any of the dependant args
-            print(self.dependant_args[key])
-
             if not [val for val in self.dependant_args[key]
                     if self.args[val]]:
                 return dependant_keys
@@ -237,7 +234,6 @@ class InputProcessor():
         return next((v[0][0] for v in self._args.values() if v[1] == "command_args"))
 
     def _get_other(self, to_check: str):
-        print(self._args.values())
         return [v[0][0] for v in self._args.values() if v[1] == to_check]
 
 
