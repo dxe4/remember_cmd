@@ -21,11 +21,18 @@ dependant_args = {
               "remove_metadata", "search_key", "remove_key"),
 }
 
+command_args = set()
+search_args = set()
+add_args = set()
+delete_args = set()
+exec_args = set()
+other_args = set()
+
 
 class DB:
 
     def __init__(self):
-        self.db_name = os.path.join(os.path.expanduser("~"), ".remember_cmd.db")
+        self.db_name = os.path.join(os.path.expanduser("~"), "remember_cmd.db")
         if not self.exists():
             self.conn = self.create()
         else:
@@ -72,73 +79,74 @@ class Input:
     def __init__(self):
         self.parser = argparse.ArgumentParser()
 
-        self.add("-c", "--command",
+        self.add(command_args, "-c", "--command",
                  help="Specify command",
                  type=str, nargs="*")
 
-        self.add("-fh", "--from_history",
+        self.add(command_args, "-fh", "--from_history",
                  help="Adds a command from history e.g. remember -fh -1 -ak foo ",
                  type=int, nargs="*")
 
-        self.add("-ak", "--add_key",
+        self.add(add_args, "-ak", "--add_key",
                  help="Add command using a key e.g. remember -c history -ak his",
                  type=str, nargs=1, metavar="KEY")
 
-        self.add("-rk", "--remove_key",
+        self.add(delete_args, "-rk", "--remove_key",
                  help="Remove command using a key e.g. remember -rk his",
                  type=str, nargs=1, metavar="KEY")
 
-        self.add("-sk", "--search_key",
+        self.add(search_args, "-sk", "--search_key",
                  help="Search command using a key e.g. remember -sk his",
                  type=str, nargs=1, metavar="KEY")
 
-        self.add("-am", "--add_metadata",
+        self.add(add_args, "-am", "--add_metadata",
                  help="Add metadata to the command e.g. remember -c history -am history of commands",
                  type=str, nargs="*", metavar="METADATA")
 
-        self.add("-rm", "--remove_metadata",
+        self.add(delete_args, "-rm", "--remove_metadata",
                  help="Remove metadata from command e.g. remember -c history -rm of commands",
                  type=str, nargs="*", metavar="METADATA")
 
-        self.add("-sm", "--search_metadata",
+        self.add(search_args, "-sm", "--search_metadata",
                  help="Search for commands with metadata e.g. remember -sm of commands",
                  type=str, nargs="*", metavar="METADATA")
 
-        self.add("-a", "--add",
+        self.add(add_args, "-a", "--add",
                  help='Add command without information e.g. remember -a "history | grep foo"',
                  type=str, nargs="*", metavar="COMMAND")
 
-        self.add("-r", "--remove",
+        self.add(delete_args, "-r", "--remove",
                  help='Remove command e.g. remember -r "history | grep foo"',
                  type=str, nargs=1, metavar="COMMAND")
 
-        self.add("-s", "--search",
+        self.add(search_args, "-s", "--search",
                  help='Search command e.g. remember -s history -R (see regex for R)',
                  type=str, nargs=1, metavar="COMMAND")
 
-        self.add("-R", "--regex",
+        self.add(other_args, "-R", "--regex",
                  help="use args as a regex for searching) e.g. remember -sk foo -R",
                  action='store_true', default=False)
 
-        self.add("-e", "--exec",
+        self.add(exec_args, "-e", "--exec",
                  help="Execute the command found. If more than one found will prompt to choose",
                  action='store_true', default=False)
 
-        self.add("-es", "--exec_safe",
+        self.add(exec_args, "-es", "--exec_safe",
                  help="Execute the command found but prompt before executing "
                       "(showing the command to be executed and asking for confirmation)"
                       "If more than one found will prompt to choose",
                  action='store_true', default=False)
 
-        self.add("-l", "--list",
+        self.add(other_args, "-l", "--list",
                  help="List all commands e.g. remember -l",
                  action='store_true', default=False)
 
         self.args = vars(self.parser.parse_args())
         print(self.state_validation())
 
-    def add(self, *args, **kwargs):
-        self.parser.add_argument(*args, **kwargs)
+    def add(self, arg_set, *args, **kwargs):
+        arg = self.parser.add_argument(*args, **kwargs)
+        arg_set.add(arg.dest)
 
     def state_validation(self):
         print(self.args)
