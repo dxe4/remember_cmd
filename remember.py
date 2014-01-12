@@ -33,7 +33,7 @@ class DB:
         keys, values = _dict.keys(), _dict.values()
         cursor = self.conn.cursor()
         query = "INSERT INTO command ('%s') VALUES %s" \
-                % ("','".join(keys), str(tuple("?"*len(values))))
+                % ("','".join(keys), str(tuple("?" * len(values))))
         cursor.execute(query, values)
 
     def create(self):
@@ -159,7 +159,13 @@ class Input:
         return []
 
     def get_input(self):
-        return {k: v for k, v in self.args.items() if v}
+        """
+            Get all the command line args as given by the user
+        @return: dict: Args given by the user in the form name : {value, type}
+                example: {'list': (True, 'other_args')}
+        """
+        return {arg: (value, self.arg_type_dict[arg])
+                for arg, value in self.args.items() if value}
 
 
 def append_to_store(command, key=None, meta_data=None):
