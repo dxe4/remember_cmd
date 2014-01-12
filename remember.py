@@ -8,27 +8,6 @@ from collections import OrderedDict
 
 # TODO consider service running at startup not sure if it worths doing yet
 
-# argparse provides groups for arg dependencies but in this case it would
-# be a lot of dirty code
-dependant_args = {
-    "add_key": ("command", "find_history"),
-    "add_metadata": ("command", "find_history"),
-    "exec": ("find_history", "search_key",
-             "search_metadata", "search"),
-    "exec_safe": ("find_history", "search_key",
-                  "search_metadata", "search"),
-    "regex": ("search", "remove", "search_metadata",
-              "remove_metadata", "search_key", "remove_key"),
-}
-
-command_args = set()
-search_args = set()
-add_args = set()
-delete_args = set()
-exec_args = set()
-other_args = set()
-
-
 class DB:
 
     def __init__(self):
@@ -78,79 +57,94 @@ class Input:
 
     def __init__(self):
         self.parser = argparse.ArgumentParser()
+        self.arg_type_dict = {}
+        # argparse provides groups for arg dependencies but in this case it would
+        # be a lot of dirty code
+        self.dependant_args = {
+            "add_key": ("command", "find_history"),
+            "add_metadata": ("command", "find_history"),
+            "exec": ("find_history", "search_key",
+                     "search_metadata", "search"),
+            "exec_safe": ("find_history", "search_key",
+                          "search_metadata", "search"),
+            "regex": ("search", "remove", "search_metadata",
+                      "remove_metadata", "search_key", "remove_key"),
+        }
 
-        self.add(command_args, "-c", "--command",
+        self.add("command_args", "-c", "--command",
                  help="Specify command",
                  type=str, nargs="*")
 
-        self.add(command_args, "-fh", "--from_history",
+        self.add("command_args", "-fh", "--from_history",
                  help="Adds a command from history e.g. remember -fh -1 -ak foo ",
                  type=int, nargs="*")
 
-        self.add(add_args, "-ak", "--add_key",
+        self.add("add_args", "-ak", "--add_key",
                  help="Add command using a key e.g. remember -c history -ak his",
                  type=str, nargs=1, metavar="KEY")
 
-        self.add(delete_args, "-rk", "--remove_key",
+        self.add("delete_args", "-rk", "--remove_key",
                  help="Remove command using a key e.g. remember -rk his",
                  type=str, nargs=1, metavar="KEY")
 
-        self.add(search_args, "-sk", "--search_key",
+        self.add("search_args", "-sk", "--search_key",
                  help="Search command using a key e.g. remember -sk his",
                  type=str, nargs=1, metavar="KEY")
 
-        self.add(add_args, "-am", "--add_metadata",
+        self.add("add_args", "-am", "--add_metadata",
                  help="Add metadata to the command e.g. remember -c history -am history of commands",
                  type=str, nargs="*", metavar="METADATA")
 
-        self.add(delete_args, "-rm", "--remove_metadata",
+        self.add("delete_args", "-rm", "--remove_metadata",
                  help="Remove metadata from command e.g. remember -c history -rm of commands",
                  type=str, nargs="*", metavar="METADATA")
 
-        self.add(search_args, "-sm", "--search_metadata",
+        self.add("search_args", "-sm", "--search_metadata",
                  help="Search for commands with metadata e.g. remember -sm of commands",
                  type=str, nargs="*", metavar="METADATA")
 
-        self.add(add_args, "-a", "--add",
+        self.add("add_args", "-a", "--add",
                  help='Add command without information e.g. remember -a "history | grep foo"',
                  type=str, nargs="*", metavar="COMMAND")
 
-        self.add(delete_args, "-r", "--remove",
+        self.add("delete_args", "-r", "--remove",
                  help='Remove command e.g. remember -r "history | grep foo"',
                  type=str, nargs=1, metavar="COMMAND")
 
-        self.add(search_args, "-s", "--search",
+        self.add("search_args", "-s", "--search",
                  help='Search command e.g. remember -s history -R (see regex for R)',
                  type=str, nargs=1, metavar="COMMAND")
 
-        self.add(other_args, "-R", "--regex",
+        self.add("other_args", "-R", "--regex",
                  help="use args as a regex for searching) e.g. remember -sk foo -R",
                  action='store_true', default=False)
 
-        self.add(exec_args, "-e", "--exec",
+        self.add("exec_args", "-e", "--exec",
                  help="Execute the command found. If more than one found will prompt to choose",
                  action='store_true', default=False)
 
-        self.add(exec_args, "-es", "--exec_safe",
+        self.add("exec_args", "-es", "--exec_safe",
                  help="Execute the command found but prompt before executing "
                       "(showing the command to be executed and asking for confirmation)"
                       "If more than one found will prompt to choose",
                  action='store_true', default=False)
 
-        self.add(other_args, "-l", "--list",
+        self.add("other_args", "-l", "--list",
                  help="List all commands e.g. remember -l",
                  action='store_true', default=False)
 
         self.args = vars(self.parser.parse_args())
         print(self.state_validation())
+        print(self.args)
+        print(self.arg_type_dict)
 
-    def add(self, arg_set, *args, **kwargs):
+    def add(self, arg_type, *args, **kwargs):
         arg = self.parser.add_argument(*args, **kwargs)
-        arg_set.add(arg.dest)
+        self.arg_type_dict[arg.dest] = arg_type
 
     def state_validation(self):
         print(self.args)
-        dependant_keys = [key for key in dependant_args.keys()
+        dependant_keys = [key for key in self.dependant_args.keys()
                           if self.args[key]]
         # no dependant keys we can go on
         if not dependant_keys:
@@ -159,10 +153,13 @@ class Input:
         for key in dependant_keys:
             # case dependant keys
             # don't have any of the dependant args
-            if not [val for val in dependant_args[key]
+            if not [val for val in self.dependant_args[key]
                     if self.args[val]]:
                 return dependant_keys
         return []
+
+    def get_input(self):
+        return {k: v for k, v in self.args.items() if v}
 
 
 def append_to_store(command, key=None, meta_data=None):
@@ -224,6 +221,7 @@ def exec_command(command: str):
 
 if __name__ == "__main__":
     db = DB()
-    Input()
+    _input = Input()
+    print(_input .get_input())
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
