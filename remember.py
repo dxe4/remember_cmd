@@ -4,7 +4,8 @@ import os
 import argparse
 import sqlite3
 from collections import OrderedDict
-
+from itertools import combinations, starmap
+from operator import and_
 
 # TODO consider service running at startup not sure if it worths doing yet
 
@@ -229,6 +230,8 @@ class InputProcessor():
         self.insert = self. _get_other("add_args")
         self.delete = self._get_other("delete_args")
         self.other = self._get_other("other_args")
+        if any(starmap(and_, combinations([self.search, self.insert, self.delete], 2))):
+            raise Exception("Invalid state, run remember -h")
 
     def _get_command(self):
         return next((v[0][0] for v in self._args.values() if v[1] == "command_args"))
