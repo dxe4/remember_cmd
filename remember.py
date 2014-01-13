@@ -61,7 +61,7 @@ class DB:
     def __init__(self):
         self.db_name = os.path.join(os.path.expanduser("~"), "remember_cmd.db")
         if not self.exists():
-            self.conn = self.create()
+            self.conn = self.create
         else:
             self.conn = self.connect()
 
@@ -235,6 +235,16 @@ class InputProcessor():
 
     def _get_other(self, to_check: str):
         return [v[0][0] for v in self._args.values() if v[1] == to_check]
+
+    def process(self):
+        _kwargs = {}  # TODO setup
+        if self.search:
+            find_in_store(self.command)
+        if self.delete:
+            delete_from_store()
+        if self.insert:
+            append_to_store(self.command)
+
 
 
 if __name__ == "__main__":
