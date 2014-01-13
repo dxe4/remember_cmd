@@ -61,7 +61,7 @@ class DB:
     def __init__(self):
         self.db_name = os.path.join(os.path.expanduser("~"), "remember_cmd.db")
         if not self.exists():
-            self.conn = self.create
+            self.conn = self.create()
         else:
             self.conn = self.connect()
 
@@ -244,7 +244,6 @@ class InputProcessor():
             delete_from_store()
         if self.insert:
             append_to_store(self.command)
-
 
 
 if __name__ == "__main__":
