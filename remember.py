@@ -8,7 +8,8 @@ from itertools import combinations, starmap
 
 # TODO consider service running at startup not sure if it worths doing yet
 
-def append_to_store(command, key=None, meta_data=None):
+
+def append_to_store(command, add_key=None, add_meta_data=None):
     """
         Appends a command in the store.
         You can retrieve the command back in 3 different ways:
@@ -22,34 +23,34 @@ def append_to_store(command, key=None, meta_data=None):
                 Then you can search by "requirements.txt" or by "dependencies"
 
     @param command: The command to save
-    @param key: When key is used it will be saved in a key value store
-    @param meta_data: When metadata is used you will be able to search by metadata too
+    @param add_key: When key is used it will be saved in a key value store
+    @param add_meta_data: When metadata is used you will be able to search by metadata too
     """
     pass
 
 
-def delete_from_store(command=None, key=None, meta_data=None, regex=False):
+def delete_from_store(command=None, remove_key=None, remove_metadata=None, regex=False):
     """
         Delete command(s) from store.
         Multiple values can be deleted if regex mode is used,
             or if the exactly the same meta_data exists in more than one commands
     @param command: If command is given the command(s) will be deleted.
-    @param key: If key is given the command corresponding to that key will be deleted
-    @param meta_data: If meta_data is given the command(s) corresponding to meta_data will be deleted
+    @param remove_key: If key is given the command corresponding to that key will be deleted
+    @param remove_metadata: If meta_data is given the command(s) corresponding to meta_data will be deleted
     @param regex: If regex is set to true the command and meta_data will be used as regex
             and multiple commands may be deleted at once
     """
     pass
 
 
-def find_in_store(command=None, key=None, meta_data=None, regex=False):
+def find_in_store(command=None, search_key=None, search_metadata=None, regex=False):
     """
         Find commands from store.
         Multiple values can be found if regex mode is used,
             or if the exactly the same meta_data exists in more than one commands
     @param command: If command is given will try to find the corresponding command(s)
-    @param key: If key is given the command matching the key will be returned
-    @param meta_data: If metadata is given the corresponding command(s) will be returned
+    @param search_key: If key is given the command matching the key will be returned
+    @param search_metadata: If metadata is given the corresponding command(s) will be returned
     @param regex: If regex mode is given meta_data and command will be used as regex
     @return The found command(s)
     """
@@ -230,6 +231,9 @@ class InputProcessor():
         _and = lambda x, y: x and y
         if any(starmap(_and, combinations([self.search, self.insert, self.delete], 2))):
             raise Exception("Invalid state, run remember -h")
+        print(self.command)
+        print(self.search)
+        print(self._args)
 
     def _get_command(self):
         try:
