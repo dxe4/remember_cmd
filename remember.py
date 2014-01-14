@@ -245,13 +245,13 @@ class InputProcessor():
         return {k: v[0][0] for k, v in self._args.items() if v[1] == to_check}
 
     def process(self):
-        _kwargs = {}  # TODO setup
+        # TODO when functionality is ready refactor to a better way
         if self.search:
-            find_in_store(self.command)
+            find_in_store(command=self.command, **self.search)
         if self.delete:
-            delete_from_store()
+            delete_from_store(command=self.command, **self.delete)
         if self.insert:
-            append_to_store(self.command)
+            append_to_store(self.command, **self.insert)
 
 
 if __name__ == "__main__":
