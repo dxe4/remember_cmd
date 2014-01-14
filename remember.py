@@ -9,7 +9,7 @@ from itertools import combinations, starmap
 # TODO consider service running at startup not sure if it worths doing yet
 
 
-def append_to_store(command, add_key=None, add_meta_data=None):
+def append_to_store(db, command, add_key=None, add_meta_data=None):
     """
         Appends a command in the store.
         You can retrieve the command back in 3 different ways:
@@ -29,7 +29,7 @@ def append_to_store(command, add_key=None, add_meta_data=None):
     pass
 
 
-def delete_from_store(command=None, remove_key=None, remove_metadata=None, regex=False):
+def delete_from_store(db, command=None, remove_key=None, remove_metadata=None, regex=False):
     """
         Delete command(s) from store.
         Multiple values can be deleted if regex mode is used,
@@ -43,7 +43,7 @@ def delete_from_store(command=None, remove_key=None, remove_metadata=None, regex
     pass
 
 
-def find_in_store(command=None, search_key=None, search_metadata=None, regex=False):
+def find_in_store(db, command=None, search_key=None, search_metadata=None, regex=False):
     """
         Find commands from store.
         Multiple values can be found if regex mode is used,
@@ -244,14 +244,14 @@ class InputProcessor():
     def _get_other(self, to_check: str):
         return {k: v[0][0] for k, v in self._args.items() if v[1] == to_check}
 
-    def process(self):
+    def process(self, db):
         # TODO when functionality is ready refactor to a better way
         if self.search:
-            find_in_store(command=self.command, **self.search)
+            find_in_store(db, command=self.command, **self.search)
         if self.delete:
-            delete_from_store(command=self.command, **self.delete)
+            delete_from_store(db, command=self.command, **self.delete)
         if self.insert:
-            append_to_store(self.command, **self.insert)
+            append_to_store(db, self.command, **self.insert)
 
 
 if __name__ == "__main__":
@@ -263,5 +263,8 @@ if __name__ == "__main__":
         arg_handler.parser.print_help()
     input_processor = InputProcessor(_args)
     db = DB()
+    input_processor.process(db)
+    db.disconnect()
+
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
