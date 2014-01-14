@@ -5,7 +5,6 @@ import argparse
 import sqlite3
 from collections import OrderedDict
 from itertools import combinations, starmap
-from operator import and_
 
 # TODO consider service running at startup not sure if it worths doing yet
 
@@ -58,7 +57,6 @@ def find_in_store(command=None, key=None, meta_data=None, regex=False):
 
 
 class DB:
-
     def __init__(self):
         self.db_name = os.path.join(os.path.expanduser("~"), "remember_cmd.db")
         if not self.exists():
@@ -91,8 +89,8 @@ class DB:
         cursor.execute("""
             CREATE TABLE commands(
                 id INTEGER PRIMARY KEY,
-                key VARCHAR(150),
-                metadata VARCHAR(350),
+                key VARCHAR(150) DEFAULT NULL,
+                metadata VARCHAR(350) DEFAULT NULL,
                 deleted TINYINT DEFAULT 0,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             );
@@ -103,7 +101,6 @@ class DB:
 
 
 class ArgHandler:
-
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.arg_type_dict = {}
@@ -227,17 +224,21 @@ class InputProcessor():
         self._args = _args
         self.command = self._get_command()
         self.search = self._get_other("search_args")
-        self.insert = self. _get_other("add_args")
+        self.insert = self._get_other("add_args")
         self.delete = self._get_other("delete_args")
         self.other = self._get_other("other_args")
-        if any(starmap(and_, combinations([self.search, self.insert, self.delete], 2))):
+        _and = lambda x, y: x and y
+        if any(starmap(_and, combinations([self.search, self.insert, self.delete], 2))):
             raise Exception("Invalid state, run remember -h")
 
     def _get_command(self):
-        return next((v[0][0] for v in self._args.values() if v[1] == "command_args"))
+        try:
+            return next((v[0][0] for v in self._args.values() if v[1] == "command_args"))
+        except StopIteration:
+            return None
 
     def _get_other(self, to_check: str):
-        return [v[0][0] for v in self._args.values() if v[1] == to_check]
+        return {k: v[0][0] for k, v in self._args.items() if v[1] == to_check}
 
     def process(self):
         _kwargs = {}  # TODO setup
