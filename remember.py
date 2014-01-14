@@ -126,7 +126,7 @@ class ArgHandler:
 
         self.add("command_args", "-fh", "--from_history",
                  help="Adds a command from history e.g. remember -fh -1 -ak foo ",
-                 type=int, nargs="*")
+                 type=int, nargs=1)
 
         self.add("add_args", "-ak", "--add_key",
                  help="Add command using a key e.g. remember -c history -ak his",
@@ -142,19 +142,19 @@ class ArgHandler:
 
         self.add("add_args", "-am", "--add_metadata",
                  help="Add metadata to the command e.g. remember -c history -am history of commands",
-                 type=str, nargs="*", metavar="METADATA")
+                 type=str, nargs=1, metavar="METADATA")
 
         self.add("delete_args", "-rm", "--remove_metadata",
                  help="Remove metadata from command e.g. remember -c history -rm of commands",
-                 type=str, nargs="*", metavar="METADATA")
+                 type=str, nargs=1, metavar="METADATA")
 
         self.add("search_args", "-sm", "--search_metadata",
                  help="Search for commands with metadata e.g. remember -sm of commands",
-                 type=str, nargs="*", metavar="METADATA")
+                 type=str, nargs=1, metavar="METADATA")
 
         self.add("add_args", "-a", "--add",
                  help='Add command without information e.g. remember -a "history | grep foo"',
-                 type=str, nargs="*", metavar="COMMAND")
+                 type=str, nargs=1, metavar="COMMAND")
 
         self.add("delete_args", "-r", "--remove",
                  help='Remove command e.g. remember -r "history | grep foo"',
