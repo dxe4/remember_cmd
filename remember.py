@@ -8,8 +8,24 @@ from itertools import combinations, starmap
 
 # TODO consider service running at startup not sure if it worths doing yet
 
+to_replace = ["add_", "remove_", "search_"]
 
-def append_to_store(db, command, add_key=None, add_meta_data=None):
+
+def replace_all(key: str):
+    for i in to_replace:
+        key = key.replace(i, "", 1)
+    return key
+
+
+def _clean_local(key: str):
+    return replace_all(key)
+
+
+def clean_locals(_dict: dict):
+    return {_clean_local(k): v for k, v in _dict.items() if v and not k is "db"}
+
+
+def append_to_store(db, command, add_key=None, add_metadata=None):
     """
         Appends a command in the store.
         You can retrieve the command back in 3 different ways:
@@ -26,7 +42,7 @@ def append_to_store(db, command, add_key=None, add_meta_data=None):
     @param add_key: When key is used it will be saved in a key value store
     @param add_meta_data: When metadata is used you will be able to search by metadata too
     """
-    pass
+    db.insert(clean_locals(locals()))
 
 
 def delete_from_store(db, command=None, remove_key=None, remove_metadata=None, regex=False):
@@ -61,9 +77,7 @@ class DB:
     def __init__(self):
         self.db_name = os.path.join(os.path.expanduser("~"), "remember_cmd.db")
         if not self.exists():
-            self.conn = self.create()
-        else:
-            self.conn = self.connect()
+            self.create()
 
     def exists(self):
         return os.path.exists(self.db_name)
@@ -71,34 +85,38 @@ class DB:
     def connect(self):
         return sqlite3.connect(self.db_name)
 
-    def disconnect(self):
-        if not self.conn:
-            raise Exception("Connection doesn't exist can't disconnect")
-        self.conn.close()
-
     def insert(self, _dict: dict):
+        conn = self.connect()
         _dict = OrderedDict(_dict)
         keys, values = _dict.keys(), _dict.values()
-        cursor = self.conn.cursor()
+        cursor = conn.cursor()
+        # todo fix this magic
         query = "INSERT INTO command ('%s') VALUES %s" \
-                % ("','".join(keys), str(tuple("?" * len(values))))
-        cursor.execute(query, values)
+                % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
+        print(query)
+        print(list(values))
+        cursor.execute(query, list(values))
+        cursor.close()
+        conn.commit()
+        conn.close()
 
     def create(self):
-        conn = sqlite3.connect(self.db_name)
+        conn = self.connect()
         cursor = conn.cursor()
         cursor.execute("""
-            CREATE TABLE commands(
+            CREATE TABLE command(
                 id INTEGER PRIMARY KEY,
+                command VARCHAR(600),
                 key VARCHAR(150) DEFAULT NULL,
-                metadata VARCHAR(350) DEFAULT NULL,
+                meta_data VARCHAR(350) DEFAULT NULL,
                 deleted TINYINT DEFAULT 0,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         """)
+
         cursor.close()
         conn.commit()
-        return conn
+        conn.close()
 
 
 class ArgHandler:
@@ -264,7 +282,6 @@ if __name__ == "__main__":
     input_processor = InputProcessor(_args)
     db = DB()
     input_processor.process(db)
-    db.disconnect()
 
 #store.commands["hisgrep"] = "history | grep "
 # save_store(store)
