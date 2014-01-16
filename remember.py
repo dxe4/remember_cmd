@@ -89,34 +89,27 @@ class DB:
         conn = self.connect()
         _dict = OrderedDict(_dict)
         keys, values = _dict.keys(), _dict.values()
-        cursor = conn.cursor()
-        # todo fix this magic
-        query = "INSERT INTO command ('%s') VALUES %s" \
-                % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
-        print(query)
-        print(list(values))
-        cursor.execute(query, list(values))
-        cursor.close()
-        conn.commit()
-        conn.close()
+        with conn:
+            cursor = conn.cursor()
+            # todo fix this magic
+            query = "INSERT INTO command ('%s') VALUES %s" \
+                    % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
+            cursor.execute(query, list(values))
 
     def create(self):
         conn = self.connect()
-        cursor = conn.cursor()
-        cursor.execute("""
-            CREATE TABLE command(
-                id INTEGER PRIMARY KEY,
-                command VARCHAR(600),
-                key VARCHAR(150) DEFAULT NULL,
-                meta_data VARCHAR(350) DEFAULT NULL,
-                deleted TINYINT DEFAULT 0,
-                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-            );
-        """)
-
-        cursor.close()
-        conn.commit()
-        conn.close()
+        with conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE command(
+                    id INTEGER PRIMARY KEY,
+                    command VARCHAR(600),
+                    key VARCHAR(150) DEFAULT NULL,
+                    meta_data VARCHAR(350) DEFAULT NULL,
+                    deleted TINYINT DEFAULT 0,
+                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            """)
 
 
 class ArgHandler:
