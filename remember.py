@@ -97,15 +97,16 @@ class DB:
         query = """
             SELECT * from command WHERE %s
         """ % self._build_where(keys, values, regex)
+        result = []
         with conn:
             cursor = conn.cursor()
             # todo add wildcard % in values for LIKE (when regex==True
-            conn.execute(query, values)
-            print(query)
+            cursor.execute(query, list(values))
+            result = [row for row in cursor]
+        return result
 
     def insert(self, _dict: dict):
         conn = self.connect()
-        _dict = OrderedDict(_dict)
         keys, values = _dict.keys(), _dict.values()
         # todo fix this magic
         query = "INSERT INTO command ('%s') VALUES %s" \
