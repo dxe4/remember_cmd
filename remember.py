@@ -71,6 +71,7 @@ def find_in_store(db, command=None, search_key=None, search_metadata=None, regex
 
 
 class DB:
+
     def __init__(self):
         self.db_name = os.path.join(os.path.expanduser("~"), "remember_cmd.db")
         if not self.exists():
@@ -85,7 +86,8 @@ class DB:
     def _build_where(self, keys, values, regex):
         keys = list(keys)
         compare = " LIKE " if regex else " = "
-        to_add = [[keys[count], compare, value] for count, value in enumerate(values)]
+        to_add = [[keys[count], compare, value]
+                  for count, value in enumerate(values)]
         return " AND ".join(["".join(i) for i in to_add])
 
     def find(self, _dict: dict):
@@ -95,7 +97,6 @@ class DB:
         query = """
             SELECT * from command WHERE %s
         """ % self._build_where(keys, values, regex)
-
 
     def insert(self, _dict: dict):
         conn = self.connect()
@@ -125,6 +126,7 @@ class DB:
 
 
 class ArgHandler:
+
     def __init__(self):
         self.parser = argparse.ArgumentParser()
         self.arg_type_dict = {}
@@ -231,7 +233,8 @@ class ArgHandler:
                 example: {'list': (True, 'other_args')}
         """
         cast_bools = lambda val: val if isinstance(val, list) else [val]
-        get_val = lambda value, arg: (cast_bools(value), self.arg_type_dict[arg])
+        get_val = lambda value, arg: (
+            cast_bools(value), self.arg_type_dict[arg])
         return {arg: get_val(value, arg)
                 for arg, value in self.args.items() if value}
 
@@ -246,6 +249,7 @@ def exec_command(command: str):
 
 
 class InputProcessor():
+
     def __init__(self, _args: dict):
         self._args = _args
         self.command = self._get_command()
@@ -283,7 +287,8 @@ if __name__ == "__main__":
     arg_handler = ArgHandler()
     _args = arg_handler.get_input()
     if arg_handler.state_validation():
-        raise NotImplementedError("Need to give a proper warning which args have dependencies")
+        raise NotImplementedError(
+            "Need to give a proper warning which args have dependencies")
     if not _args:
         arg_handler.parser.print_help()
     input_processor = InputProcessor(_args)
