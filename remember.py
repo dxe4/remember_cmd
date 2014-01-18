@@ -86,7 +86,7 @@ class DB:
     def _build_where(self, keys, values, regex):
         keys = list(keys)
         compare = " LIKE " if regex else " = "
-        to_add = [[keys[count], compare, value]
+        to_add = [[keys[count], compare, "?"]
                   for count, value in enumerate(values)]
         return " AND ".join(["".join(i) for i in to_add])
 
@@ -97,32 +97,38 @@ class DB:
         query = """
             SELECT * from command WHERE %s
         """ % self._build_where(keys, values, regex)
+        with conn:
+            cursor = conn.cursor()
+            # todo add wildcard % in values for LIKE (when regex==True
+            conn.execute(query, values)
+            print(query)
 
     def insert(self, _dict: dict):
         conn = self.connect()
         _dict = OrderedDict(_dict)
         keys, values = _dict.keys(), _dict.values()
+        # todo fix this magic
+        query = "INSERT INTO command ('%s') VALUES %s" \
+                % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
         with conn:
             cursor = conn.cursor()
-            # todo fix this magic
-            query = "INSERT INTO command ('%s') VALUES %s" \
-                    % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
             cursor.execute(query, list(values))
 
     def create(self):
         conn = self.connect()
+        query = """
+            CREATE TABLE command(
+                id INTEGER PRIMARY KEY,
+                command VARCHAR(600),
+                key VARCHAR(150) DEFAULT NULL,
+                meta_data VARCHAR(350) DEFAULT NULL,
+                deleted TINYINT DEFAULT 0,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        """
         with conn:
             cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE command(
-                    id INTEGER PRIMARY KEY,
-                    command VARCHAR(600),
-                    key VARCHAR(150) DEFAULT NULL,
-                    meta_data VARCHAR(350) DEFAULT NULL,
-                    deleted TINYINT DEFAULT 0,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-                );
-            """)
+            cursor.execute(query)
 
 
 class ArgHandler:
@@ -295,5 +301,5 @@ if __name__ == "__main__":
     db = DB()
     input_processor.process(db)
 
-#store.commands["hisgrep"] = "history | grep "
+# store.commands["hisgrep"] = "history | grep "
 # save_store(store)
