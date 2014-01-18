@@ -6,12 +6,9 @@ import sqlite3
 from collections import OrderedDict
 from itertools import combinations, starmap
 
-# TODO consider service running at startup not sure if it worths doing yet
-
-to_replace = ["add_", "remove_", "search_"]
-
 
 def replace_all(key: str):
+    to_replace = ["add_", "remove_", "search_"]
     for i in to_replace:
         key = key.replace(i, "", 1)
     return key
@@ -22,7 +19,7 @@ def _clean_local(key: str):
 
 
 def clean_locals(_dict: dict):
-    return {_clean_local(k): v for k, v in _dict.items() if v and not k is "db"}
+    return {_clean_local(k): v for k, v in _dict.items() if v is not None and not k is "db"}
 
 
 def append_to_store(db, command, add_key=None, add_metadata=None):
@@ -40,7 +37,7 @@ def append_to_store(db, command, add_key=None, add_metadata=None):
 
     @param command: The command to save
     @param add_key: When key is used it will be saved in a key value store
-    @param add_meta_data: When metadata is used you will be able to search by metadata too
+    @param add_metadata: When metadata is used you will be able to search by metadata too
     """
     db.insert(clean_locals(locals()))
 
@@ -70,7 +67,7 @@ def find_in_store(db, command=None, search_key=None, search_metadata=None, regex
     @param regex: If regex mode is given meta_data and command will be used as regex
     @return The found command(s)
     """
-    pass
+    db.find(clean_locals(locals()))
 
 
 class DB:
@@ -84,6 +81,21 @@ class DB:
 
     def connect(self):
         return sqlite3.connect(self.db_name)
+
+    def _build_where(self, keys, values, regex):
+        keys = list(keys)
+        compare = " LIKE " if regex else " = "
+        to_add = [[keys[count], compare, value] for count, value in enumerate(values)]
+        return " AND ".join(["".join(i) for i in to_add])
+
+    def find(self, _dict: dict):
+        conn = self.connect()
+        regex = _dict.pop("regex")
+        keys, values = _dict.keys(), _dict.values()
+        query = """
+            SELECT * from command WHERE %s
+        """ % self._build_where(keys, values, regex)
+
 
     def insert(self, _dict: dict):
         conn = self.connect()
@@ -218,7 +230,9 @@ class ArgHandler:
         @return: dict: Args given by the user in the form name : {value, type}
                 example: {'list': (True, 'other_args')}
         """
-        return {arg: (value, self.arg_type_dict[arg])
+        cast_bools = lambda val: val if isinstance(val, list) else [val]
+        get_val = lambda value, arg: (cast_bools(value), self.arg_type_dict[arg])
+        return {arg: get_val(value, arg)
                 for arg, value in self.args.items() if value}
 
 
@@ -242,9 +256,6 @@ class InputProcessor():
         _and = lambda x, y: x and y
         if any(starmap(_and, combinations([self.search, self.insert, self.delete], 2))):
             raise Exception("Invalid state, run remember -h")
-        print(self.command)
-        print(self.search)
-        print(self._args)
 
     def _get_command(self):
         try:
@@ -257,8 +268,11 @@ class InputProcessor():
 
     def process(self, db):
         # TODO when functionality is ready refactor to a better way
+        kwargs = {}
         if self.search:
-            find_in_store(db, command=self.command, **self.search)
+            kwargs.update(self.search)
+            kwargs.update(self.other)
+            find_in_store(db, command=self.command, **kwargs)
         if self.delete:
             delete_from_store(db, command=self.command, **self.delete)
         if self.insert:
