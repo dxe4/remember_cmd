@@ -3,7 +3,6 @@ import sys
 import os
 import argparse
 import sqlite3
-from collections import OrderedDict
 from itertools import combinations, starmap
 from functools import wraps
 
@@ -74,11 +73,14 @@ def find_in_store(db, command=None, search_key=None, search_metadata=None, regex
 def db_operation(f):
     @wraps(f)
     def prepare_args(self, _dict: dict):
-        keys, values = _dict.keys(), list(_dict.values())
         try:
             regex = _dict.pop("regex")
+            keys, values = _dict.keys(), list(_dict.values())
+            if regex:
+                values = ["%{}%".format(i) for i in values]
             return f(self, keys, values, regex)
         except KeyError:
+            keys, values = _dict.keys(), list(_dict.values())
             return f(self, keys, values)
     return prepare_args
 
@@ -100,7 +102,6 @@ class DB:
         conn = self.connect()
         with conn:
             cursor = conn.cursor()
-             # todo add wildcard % in values for LIKE (when regex==True
             if values:
                 cursor.execute(query, values)
             else:
