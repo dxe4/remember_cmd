@@ -19,7 +19,8 @@ def _clean_local(key: str):
 
 
 def clean_locals(_dict: dict):
-    return {_clean_local(k): v for k, v in _dict.items() if v is not None and not k is "db"}
+    return {_clean_local(k): v for k, v in _dict.items()
+            if v is not None and not k is "db"}  # remove not needed pars
 
 
 def append_to_store(db, command, add_key=None, add_metadata=None):
