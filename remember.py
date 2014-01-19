@@ -237,7 +237,7 @@ class ArgHandler:
         arg = self.parser.add_argument(*args, **kwargs)
         self.arg_type_dict[arg.dest] = arg_type
 
-    def state_validation(self):
+    def state_invalid(self):
         dependant_keys = [key for key in self.dependant_args.keys()
                           if self.args[key]]
         # no dependant keys we can go on
@@ -291,7 +291,7 @@ class InputProcessor():
         try:
             command_args = next(((k, v[0][0]) for k, v in self._args.items() if v[1] == "command_args"))
             if command_args[0] is "from_history":
-                return "from history"
+                return self.get_command_from_history()
             else:
                 return command_args[1]
         except StopIteration:
@@ -320,7 +320,8 @@ class InputProcessor():
 if __name__ == "__main__":
     arg_handler = ArgHandler()
     _args = arg_handler.get_input()
-    if arg_handler.state_validation():
+    if arg_handler.state_invalid():
+        # TODO implement me
         raise NotImplementedError(
             "Need to give a proper warning which args have dependencies")
     if not _args:
