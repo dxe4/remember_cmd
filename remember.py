@@ -5,6 +5,7 @@ import argparse
 import sqlite3
 from collections import OrderedDict
 from itertools import combinations, starmap
+from functools import wraps
 
 
 def replace_all(key: str):
@@ -53,7 +54,7 @@ def delete_from_store(db, command=None, remove_key=None, remove_metadata=None, r
     @param regex: If regex is set to true the command and meta_data will be used as regex
             and multiple commands may be deleted at once
     """
-    pass
+    db.delete(clean_locals(locals()))
 
 
 def find_in_store(db, command=None, search_key=None, search_metadata=None, regex=False):
@@ -68,6 +69,18 @@ def find_in_store(db, command=None, search_key=None, search_metadata=None, regex
     @return The found command(s)
     """
     db.find(clean_locals(locals()))
+
+
+def db_operation(f):
+    @wraps(f)
+    def prepare_args(self, _dict: dict):
+        keys, values = _dict.keys(), list(_dict.values())
+        try:
+            regex = _dict.pop("regex")
+            return f(self, keys, values, regex)
+        except KeyError:
+            return f(self, keys, values)
+    return prepare_args
 
 
 class DB:
@@ -102,24 +115,22 @@ class DB:
                   for count, value in enumerate(values)]
         return " AND ".join(["".join(i) for i in to_add])
 
-    def delete(self, _dict: dict):
-        regex = _dict.pop("regex")
-        keys, values = _dict.keys(), list(_dict.values())
+    @db_operation
+    def delete(self, keys: list, values: list, regex):
         query = """
             DELETE FROM command WHERE %s
         """ % self._build_where(keys, values, regex)
         self.exec_query(query, values)
 
-    def find(self, _dict: dict):
-        regex = _dict.pop("regex")
-        keys, values = _dict.keys(), list(_dict.values())
+    @db_operation
+    def find(self, keys: list, values: list, regex):
         query = """
             SELECT * from command WHERE %s
         """ % self._build_where(keys, values, regex)
         return self.exec_query(query, values, return_results=True)
 
-    def insert(self, _dict: dict):
-        keys, values = _dict.keys(), _dict.values()
+    @db_operation
+    def insert(self, keys: list, values: list):
         # todo fix this magic
         query = "INSERT INTO command ('%s') VALUES %s" \
                 % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
