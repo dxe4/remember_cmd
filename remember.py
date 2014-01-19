@@ -288,12 +288,20 @@ class InputProcessor():
 
     def _get_command(self):
         try:
-            return next((v[0][0] for v in self._args.values() if v[1] == "command_args"))
+            command_args = next(((k, v[0][0]) for k, v in self._args.items() if v[1] == "command_args"))
+            if command_args[0] is "from_history":
+                return "from history"
+            else:
+                return command_args[1]
         except StopIteration:
             return None
 
     def _get_other(self, to_check: str):
         return {k: v[0][0] for k, v in self._args.items() if v[1] == to_check}
+
+    def get_command_from_history(self):
+        # todo implement me
+        raise NotImplementedError()
 
     def process(self, db):
         # TODO when functionality is ready refactor to a better way
