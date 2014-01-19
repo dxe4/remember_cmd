@@ -99,8 +99,7 @@ class DB:
         return sqlite3.connect(self.db_name)
 
     def exec_query(self, query: str, values: list, return_results=False):
-        conn = self.connect()
-        with conn:
+        with self.connect() as conn:
             cursor = conn.cursor()
             if values:
                 cursor.execute(query, values)
