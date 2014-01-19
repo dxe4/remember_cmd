@@ -83,6 +83,18 @@ class DB:
     def connect(self):
         return sqlite3.connect(self.db_name)
 
+    def exec_query(self, query: str, values: list, return_results=False):
+        conn = self.connect()
+        with conn:
+            cursor = conn.cursor()
+             # todo add wildcard % in values for LIKE (when regex==True
+            if values:
+                cursor.execute(query, values)
+            else:
+                cursor.execute(query)
+            if return_results:
+                return [row for row in cursor]
+
     def _build_where(self, keys, values, regex):
         keys = list(keys)
         compare = " LIKE " if regex else " = "
@@ -90,33 +102,30 @@ class DB:
                   for count, value in enumerate(values)]
         return " AND ".join(["".join(i) for i in to_add])
 
-    def find(self, _dict: dict):
-        conn = self.connect()
+    def delete(self, _dict: dict):
         regex = _dict.pop("regex")
-        keys, values = _dict.keys(), _dict.values()
+        keys, values = _dict.keys(), list(_dict.values())
+        query = """
+            DELETE FROM command WHERE %s
+        """ % self._build_where(keys, values, regex)
+        self.exec_query(query, values)
+
+    def find(self, _dict: dict):
+        regex = _dict.pop("regex")
+        keys, values = _dict.keys(), list(_dict.values())
         query = """
             SELECT * from command WHERE %s
         """ % self._build_where(keys, values, regex)
-        result = []
-        with conn:
-            cursor = conn.cursor()
-            # todo add wildcard % in values for LIKE (when regex==True
-            cursor.execute(query, list(values))
-            result = [row for row in cursor]
-        return result
+        return self.exec_query(query, values, return_results=True)
 
     def insert(self, _dict: dict):
-        conn = self.connect()
         keys, values = _dict.keys(), _dict.values()
         # todo fix this magic
         query = "INSERT INTO command ('%s') VALUES %s" \
                 % ("','".join(keys), str(tuple("?" * len(values))).replace("'", ""))
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute(query, list(values))
+        self.exec_query(query, values)
 
     def create(self):
-        conn = self.connect()
         query = """
             CREATE TABLE command(
                 id INTEGER PRIMARY KEY,
@@ -127,9 +136,7 @@ class DB:
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             );
         """
-        with conn:
-            cursor = conn.cursor()
-            cursor.execute(query)
+        self.exec_query(query, values=None)
 
 
 class ArgHandler:
